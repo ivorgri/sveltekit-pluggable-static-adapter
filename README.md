@@ -1,0 +1,1 @@
+# sveltekit-pluggable-static-adapter
