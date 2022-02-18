@@ -1,0 +1,37 @@
+{
+  "name": "@ivorgri/sveltekit-pluggable-static-adapter",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ivorgri/sveltekit-pluggable-static-adapter"
+  },
+  "license": "MIT",
+  "homepage": "",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "index.d.ts",
+  "dependencies": {
+    "tiny-glob": "^0.2.9"
+  },
+  "devDependencies": {
+    "@sveltejs/kit": "1.0.0-next.221",
+    "playwright-chromium": "^1.17.0",
+    "port-authority": "^1.1.2",
+    "sirv": "^2.0.0",
+    "svelte": "^3.44.2",
+    "uvu": "^0.5.2"
+  },
+  "scripts": {
+    "lint": "eslint --ignore-path .gitignore \"**/*.{ts,js,svelte}\" && npm run check-format",
+    "check": "tsc",
+    "format": "npm run check-format -- --write",
+    "check-format": "prettier --check . --config ../../.prettierrc --ignore-path .gitignore",
+    "test": "echo 'No test provided'"
+  }
+}
