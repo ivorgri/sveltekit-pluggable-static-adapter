@@ -7,7 +7,8 @@ import zlib from 'zlib';
 
 const pipe = promisify(pipeline);
 
-//: {pages:string, assets:string, fallback:string, precompress:boolean, afterCleanupPlugins:[()=>void], afterPrerenderPlugins:[()=>void], afterPrecompressPlugins:[()=>void]}) 
+//: {pages:string, assets:string, fallback:string, precompress:boolean, afterCleanupPlugins:[()=>void], afterPrerenderPlugins:[()=>void], afterPrecompressPlugins:[()=>void]}
+
 /** @type {import('.')} */
 export default function ({ pages = 'build', assets = pages, fallback, precompress = false, afterCleanupPlugins, afterPrerenderPlugins, afterPrecompressPlugins
  }) 
@@ -66,6 +67,7 @@ async function executePlugins(builder, plugin_array,process) {
 	if (plugin_array && plugin_array.length > 0) {
 		builder.log(`Performing after ${process} plugins [${plugin_array.length}]`);
 		for (const plugin of plugin_array) {
+			console.log(plugin);
 			builder.log(`Plugin: ${plugin.name ? plugin.name : 'Unnamed plugin'}`);
 			await plugin();
 		}

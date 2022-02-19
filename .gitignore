@@ -2,7 +2,7 @@
 /test
 
 # Typescript
-index.ts
+/lib
 
 # Logs
 logs
