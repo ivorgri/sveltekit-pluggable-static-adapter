@@ -1,3 +1,4 @@
+import type { Builder } from '@sveltejs/kit'
 import { createReadStream, createWriteStream, statSync } from 'fs';
 import { pipeline } from 'stream';
 import glob from 'tiny-glob';
@@ -8,14 +9,16 @@ const pipe = promisify(pipeline);
 
 /** @type {import('.')} */
 export default function ({ pages = 'build', assets = pages, fallback, precompress = false, afterCleanupCallback, afterPrerenderCallback, afterPrecompressCallback
- }) 
+ } : {pages:string, assets:string, fallback:string, precompress:boolean, afterCleanupCallback:Function, afterPrerenderCallback:Function, afterPrecompressCallback:Function}) 
  {
 	return {
 		name: '@ivorgri/sveltekit-pluggable-adapter-static',
 
-		async adapt(builder) {
+		async adapt(builder:Builder) {
 			builder.rimraf(assets);
 			builder.rimraf(pages);
+
+			// await executePlugins(builder,afterCleanupPlugins,'prerender');
 
 			if (afterCleanupCallback) {
 				await afterCleanupCallback(builder,pages,assets)
@@ -29,6 +32,11 @@ export default function ({ pages = 'build', assets = pages, fallback, precompres
 				all: !fallback,
 				dest: pages
 			});
+
+			console.log(afterPrerenderCallback);
+			console.log(builder);
+			console.log(pages);
+			console.log(assets);
 
 			if (afterPrerenderCallback) {
 				await afterPrerenderCallback(builder, pages, assets);
@@ -63,7 +71,7 @@ export default function ({ pages = 'build', assets = pages, fallback, precompres
 /**
  * @param {string} directory
  */
- async function compress(directory) {
+ async function compress(directory:string) {
 	const files = await glob('**/*.{html,js,json,css,svg,xml}', {
 		cwd: directory,
 		dot: true,
@@ -80,7 +88,7 @@ export default function ({ pages = 'build', assets = pages, fallback, precompres
  * @param {string} file
  * @param {'gz' | 'br'} format
  */
-async function compress_file(file, format = 'gz') {
+async function compress_file(file:string, format = 'gz') {
 	const compress =
 		format == 'br'
 			? zlib.createBrotliCompress({

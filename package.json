@@ -7,15 +7,9 @@
   },
   "license": "MIT",
   "homepage": "",
-  "type": "module",
   "main": "index.js",
-  "exports": {
-    ".": {
-      "import": "./index.js"
-    },
-    "./package.json": "./package.json"
-  },
   "types": "index.d.ts",
+  "type": "module",
   "dependencies": {
     "tiny-glob": "^0.2.9"
   },
@@ -36,8 +30,5 @@
     "check-format": "prettier --check . --config ../../.prettierrc --ignore-path .gitignore",
     "test": "echo 'No test provided'",
     "build": "tsc"
-  },
-  "files": [
-    "lib/**/*"
-  ]
+  }
 }
