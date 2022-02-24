@@ -1,6 +1,6 @@
 {
   "name": "@ivorgri/sveltekit-pluggable-static-adapter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/ivorgri/sveltekit-pluggable-static-adapter"
@@ -16,6 +16,7 @@
   "devDependencies": {
     "@sveltejs/kit": "1.0.0-next.221",
     "@types/node-fetch": "^2.6.1",
+    "eslint": "^8.9.0",
     "playwright-chromium": "^1.17.0",
     "port-authority": "^1.1.2",
     "sirv": "^2.0.0",

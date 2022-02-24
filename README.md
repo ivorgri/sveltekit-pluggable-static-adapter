@@ -1,15 +1,31 @@
 # @ivorgri/sveltekit-pluggable-static-adapter
 
-Adaption of the standard static adapter from the Sveltekit team. Inspiration for this custom adapter is based on [the input in issue #3166](https://github.com/sveltejs/kit/issues/3166) provided by [Adam Coster](https://github.com/adam-coster).
+Adaption of the standard static adapter from the Sveltekit team. Inspiration for this custom adapter is based on [the input in issue #3166](https://github.com/sveltejs/kit/issues/3166) provided by [Adam Coster](https://github.com/adam-coster). The goal of the adapter is to allow custom logic to be run at specific hooks inside the build process of the static adapter. 
 
 ## Usage
 
-Install with `npm i -D @ivorgri/sveltekit-adapter-static-local-image`, then add the adapter to your `svelte.config.js`:
+Install package with `npm i -D @ivorgri/sveltekit-pluggable-static-adapter`, then add the adapter to your `svelte.config.js`:
 
 ```js
 // svelte.config.js
-import adapter from '@ivorgri/sveltekit-adapter-static-local-image';
+import adapter from '@ivorgri/sveltekit-pluggable-static-adapter';
+```
+## Hooks
 
+There are three possible hooks:
+* afterCleanupCallback
+* afterPrerenderCallback
+* afterPrecompressCallback
+
+These hooks should be provided with functions that should be run in order by the callback hooks. This should be done in the svelte.config.js file. 
+
+In these hooks, the following information from the static adapter is available:
+* builder (can be used for adding logging to build process)
+* pages (folder where the pages are generated)
+* assets (folder where the assets are stored)
+
+```js
+// svelte.config.js
 export default {
 	kit: {
 		adapter: adapter({
@@ -18,68 +34,99 @@ export default {
 			assets: 'build',
 			fallback: null,
 			precompress: false,
-            // Add domain static image downloader
-            cmsUrls: ["your.domain.com/potential/sub/route"],
-			// Added converted JPG/JPEG/PNG to WEBP images
-			convertWebpImages: false
+            afterCleanupCallback: async (builder, pages, assets) => {
+				// Add functions here
+			},
+            afterPrerenderCallback: async (builder, pages, assets) => {
+				// Add functions here
+			},
+            afterPrecompressCallback: async (builder, pages, assets) => {
+				// Add functions here
+			},
 		})
 	}
 };
 ```
-## Options
+## Plugin
 
-### cmsUrls
+You can make your own plugin by creating an async function, which does something with the build files (or before they are build). For some examples, see the list of plugins below. 
 
-A list of strings containing the URLs from which you would like to download the images. The adapter will take these URLs and start going through the generated files. Once it finds a complete link, including an image extension, it will download the files into the "img" folder inside the folder that provided for "assets". Once all the files are downloaded, the URL in the generated files with be replaced with a relative link to the "img" folder. 
+### List of plugins
 
-Be aware: the adapter looks for the base URL which is similar for ALL images. Any dynamic routing (i.e. date sub directories) are added to the "img" folder. 
+Below you can find a list of plugins that are already out there. 
 
-For example, if you have the following URL:
+* [Convert images to WEBP](https://www.npmjs.com/package/@ivorgri/sveltekit-pluggable-static-adapter-webp-plugin)
+
+```js
+// svelte.config.js
+
+// ...
+
+import convertAssetsToWebp from '@ivorgri/sveltekit-pluggable-static-adapter-webp-plugin';
+
+//...
+
+export default {
+	kit: {
+		adapter: adapter({
+            // ...
+            afterPrerenderCallback: async (builder, pages, assets) => {
+				await convertAssetsToWebp(builder,assets);
+			},
+		})
+	}
+};
 ```
-    https://your.domain.com/upload/folder/2022/02/02/image.jpg
+
+* [Download images from external origin](https://www.npmjs.com/package/@ivorgri/sveltekit-pluggable-static-adapter-external-image-plugin)
+
+```js
+// svelte.config.js
+
+// ...
+
+import replaceExternalImages from '@ivorgri/sveltekit-pluggable-static-adapter-external-image-plugin';
+
+//...
+
+export default {
+	kit: {
+		adapter: adapter({
+            // ...
+            afterPrerenderCallback: async (builder, pages, assets) => {
+				await replaceExternalImages("origin.domain.of.images.com",builder,pages,assets)
+			},
+		})
+	}
+};
 ```
 
-You should provide the following URL:
+* [Create sitemap after generation](https://www.npmjs.com/package/@ivorgri/sveltekit-pluggable-static-adapter-sitemap-plugin)
 
-```
-    https://your.domain.com/upload/folder
-```
+```js
+// svelte.config.js
 
-The adapter will then create the following directory in the "img" folder:
+// ...
 
-```
-img
-└─── 2022
-     └─── 02
-          └─── 02
-               |   image.jpg
-```
+import generateSitemap from '@ivorgri/sveltekit-pluggable-static-adapter-sitemap-plugin';
 
-### convertWebpImages
+//...
 
-When set to "true", the adapter will take all the JPG/JPEG/PNG files it can find, and convert those to WEBP files. This option should be used in conjunction with a specific implementation for a <code><picture></code> component. It should convert the existing URL for an image to a WEBP variant. When running this in a development environment, without having access to the WEBP file, a condition is added which checks if a WEBP source set should be used. Make sure to change this when running the build, so the sourceset is added to the result.  
-
-```
-<script lang="ts">
-    export let imageSrc:string;
-    export let imageAlt:string;
-    
-    let useWebp = import.meta.env.VITE_USE_WEBP; // Or another environment variable that you would like to use
-
-    $: imageSrcWebp = imageSrc.replace(/jpg|jpeg|png/g,"webp");
-</script>
-
-<picture>
-    {#if useWebp}
-        <source srcset="{imageSrcWebp}" type="image/webp"> 
-    {/if}
-    <img src="{imageSrc}" alt="{imageAlt}">
-</picture>
+export default {
+	kit: {
+		adapter: adapter({
+            // ...
+            afterPrerenderCallback: async (builder, pages, assets) => {
+				await generateSitemap("your.site.domain.com",builder,pages)
+			},
+		})
+	}
+};
 ```
 
 ## Changelog
 
-[The Changelog for this package is available on GitHub](https://github.com/ivorgri/sveltekit-adapter-static-local-image/CHANGELOG.md).
+[The Changelog for this package is available on GitHub](https://github.com/ivorgri/sveltekit-pluggable-static-adapter/CHANGELOG.md).
 
 ## License
 
